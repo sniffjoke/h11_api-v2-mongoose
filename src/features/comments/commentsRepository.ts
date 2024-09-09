@@ -71,13 +71,11 @@ class CommentsRepository {
 
     async createComment(commentData: IComment, token: string, postId: string): Promise<CommentInstance> {
         const decodedToken: any = decode(token)
-        // const user: UserInstance | null = await this.users.findById(decodedToken?._id)
-        const user: UserInstance | null = await this.users.findOne({_id: '66db95dd548e4e1cbe825cf9'})
+        const user: UserInstance | null = await this.users.findById(decodedToken?._id)
         const commentatorInfo: CommentatorInfoInterface = {
             userId: decodedToken._id,
             userLogin: user!.login
         }
-        console.log(commentData)
         const comment = new this.comments({...commentData, commentatorInfo, postId})
         await comment.save()
         return comment
