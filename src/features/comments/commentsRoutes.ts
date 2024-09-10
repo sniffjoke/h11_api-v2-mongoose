@@ -37,6 +37,8 @@ router.route('/:id')
 router.route('/:id/like-status')
     .put(
         authMiddlewareWithBearer,
+        idCommentValidator,
+        errorExpressValidatorMiddleware,
         commentsController.updateCommentByIdWithLikeStatus
     )
 
