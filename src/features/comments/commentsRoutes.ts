@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {commentsController} from "./commentsController";
 import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
-import {contentCommentValidator, idCommentValidator} from "./validators/commentsValidators";
+import {contentCommentValidator, idCommentValidator, likeStatusCommentValidator} from "./validators/commentsValidators";
 import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
 import {isOwnMiddleware} from "../../middlewares/isOwnMiddleware";
 
@@ -38,6 +38,7 @@ router.route('/:id/like-status')
     .put(
         authMiddlewareWithBearer,
         idCommentValidator,
+        likeStatusCommentValidator,
         errorExpressValidatorMiddleware,
         commentsController.updateCommentByIdWithLikeStatus
     )

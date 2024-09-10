@@ -7,17 +7,6 @@ export const contentCommentValidator = body('content')
     .trim()
     .isLength({min: 20, max: 300}).withMessage('Количество знаков 20-300')
 
-export const descriptionBlogValidator = body('description')
-    .isString().withMessage('Должно быть строковым значением')
-    .trim()
-    .isLength({min: 1, max: 500}).withMessage('Количество знаков: 1-500')
-
-export const websiteUrlValidator = body('websiteUrl')
-    .isString().withMessage('Должно быть строковым значением')
-    .trim()
-    .isURL().withMessage('Введите валидный URL')
-    .isLength({min: 1, max: 100}).withMessage('Количество знаков 1-100')
-
 export const idCommentValidator = param('id')
     .custom(async commentId => {
         const comment = await commentModel.findById(commentId)
@@ -27,3 +16,8 @@ export const idCommentValidator = param('id')
             return !!comment
         }
     }).withMessage('Комментарий с заданным id не найден!')
+
+export const likeStatusCommentValidator = body('likeStatus')
+    .isString().withMessage('Должно быть строковым значением')
+    .trim()
+    .matches(/\b(?:Like|Dislike|None)\b/).withMessage('Непонятный тип')
