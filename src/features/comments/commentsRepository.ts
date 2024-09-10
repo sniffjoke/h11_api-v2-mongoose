@@ -54,7 +54,7 @@
 
 import {commentModel} from "../../models/commentsModel";
 import {IComment} from "../../types/IComment";
-import {CommentInstance} from "../../interfaces/comments.interface";
+import {CommentInstance, LikesInfo, LikeStatus} from "../../interfaces/comments.interface";
 import {userModel} from "../../models/usersModel";
 import {postModel} from "../../models/postsModel";
 import {decode} from "jsonwebtoken";
@@ -76,7 +76,12 @@ class CommentsRepository {
             userId: decodedToken._id,
             userLogin: user!.login
         }
-        const comment = new this.comments({...commentData, commentatorInfo, postId})
+        const likesInfo: LikesInfo = {
+            likesCount: 0,
+            dislikesCount: 0,
+            myStatus: LikeStatus.None
+        }
+        const comment = new this.comments({...commentData, commentatorInfo, postId, likesInfo})
         await comment.save()
         return comment
     }

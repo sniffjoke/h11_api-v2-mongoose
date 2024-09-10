@@ -9,8 +9,8 @@ const router = Router();
 
 router.route('/')
     .get(
-        idCommentValidator,
-        errorExpressValidatorMiddleware,
+        // idCommentValidator,
+        // errorExpressValidatorMiddleware,
         commentsController.getCommentsWithParams
     )
 

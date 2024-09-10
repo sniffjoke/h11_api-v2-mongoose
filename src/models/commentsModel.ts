@@ -47,7 +47,8 @@ const commentSchema: Schema = new Schema({
             ref: "Post"
         },
         likesInfo: {
-            type: likesInfoSchema
+            type: likesInfoSchema,
+            required: true,
         }
 
     },
