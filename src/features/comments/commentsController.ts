@@ -23,6 +23,17 @@ class CommentsController {
         }
     }
 
+    async getAllCommentsByPostId(req: Request<any, any, any, any>, res: Response) {
+        try {
+            const commentsQuery = await findCommentsHelper(req.query, req.params.id)
+            const sortedComments = await commentsQueryRepository.getAllCommentsByPostId(commentsQuery)
+            const commentsQueryData = new CreateItemsWithQueryDto<CommentInstance>(commentsQuery, sortedComments)
+            res.status(200).json(commentsQueryData)
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
     async getCommentById(req: Request, res: Response) {
         try {
             const comment = await commentsQueryRepository.commentOutput(req.params.id)
@@ -32,9 +43,30 @@ class CommentsController {
         }
     }
 
+    async createCommentByPostId(req: Request, res: Response) {
+        try {
+            const comment = await commentsRepository.createComment(req.body, tokenService.getToken(req.headers.authorization), req.params.id)
+            const newComment = commentsQueryRepository.commentMapOutput(comment)
+            res.status(201).json(newComment)
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
     async updateCommentById(req: Request, res: Response) {
         try {
             await commentsRepository.updateCommentById(req.params.id, req.body)
+            res.status(204).send('Обновлено')
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
+    async updateCommentByIdWithLikeStatus(req: Request, res: Response) {
+        try {
+            const likeStatus = req.body.likeStatus
+            const findedComment = await commentModel.findById(req.params.id)
+            const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.myStatus': likeStatus})
             res.status(204).send('Обновлено')
         } catch (e) {
             res.status(500).send(e)
@@ -50,26 +82,6 @@ class CommentsController {
         }
     }
 
-    async getAllCommentsByPostId(req: Request<any, any, any, any>, res: Response) {
-        try {
-            const commentsQuery = await findCommentsHelper(req.query, req.params.id)
-            const sortedComments = await commentsQueryRepository.getAllCommentsByPostId(commentsQuery)
-            const commentsQueryData = new CreateItemsWithQueryDto<CommentInstance>(commentsQuery, sortedComments)
-            res.status(200).json(commentsQueryData)
-        } catch (e) {
-            res.status(500).send(e)
-        }
-    }
-
-    async createCommentByPostId(req: Request, res: Response) {
-        try {
-            const comment = await commentsRepository.createComment(req.body, tokenService.getToken(req.headers.authorization), req.params.id)
-            const newComment = commentsQueryRepository.commentMapOutput(comment)
-            res.status(201).json(newComment)
-        } catch (e) {
-            res.status(500).send(e)
-        }
-    }
 }
 
 export const commentsController = new CommentsController();

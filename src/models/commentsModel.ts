@@ -18,10 +18,12 @@ const commentatorInfoSchema: Schema = new Schema({
 
 const likesInfoSchema: Schema = new Schema({
         likesCount: {
-            type: Number
+            type: Number,
+            default: 0
         },
         dislikesCount: {
-            type: Number
+            type: Number,
+            default: 0
         },
         myStatus: {
             type: String,

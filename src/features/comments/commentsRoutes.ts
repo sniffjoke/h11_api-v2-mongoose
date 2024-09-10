@@ -34,4 +34,11 @@ router.route('/:id')
         commentsController.deleteCommentById
     )
 
+router.route('/:id/like-status')
+    .put(
+        authMiddlewareWithBearer,
+        commentsController.updateCommentByIdWithLikeStatus
+    )
+
+
 export default router
