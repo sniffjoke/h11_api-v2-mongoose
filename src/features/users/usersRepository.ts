@@ -48,16 +48,19 @@ import {CreateUserDto} from "./dto/CreateUser.dto";
 import {userModel} from "../../models/usersModel";
 import {UserInstance} from "../../interfaces/users.interface";
 import {EmailConfirmationModel} from "../../interfaces/services.interface";
+import { HydratedDocument } from "mongoose";
 
 
 class UsersRepository {
 
     public users = userModel
 
-    async createUser(userData: IUser, hashPassword: string, emailConfirmation: EmailConfirmationModel): Promise<CreateUserDto> {
+    async createUser(userData: IUser, hashPassword: string, emailConfirmation: EmailConfirmationModel, userEntity?: HydratedDocument<UserInstance>): Promise<CreateUserDto> {
         const user = new this.users({...userData, password: hashPassword, emailConfirmation})
+        // await userEntity.save()
         await user.save()
         const userDto = new CreateUserDto(user)
+        // return userEntity._id.toString()
         return userDto
     }
 

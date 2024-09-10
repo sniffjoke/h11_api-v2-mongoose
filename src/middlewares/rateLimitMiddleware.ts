@@ -13,7 +13,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
             IP: ip.address(),
             date: new Date(Date.now()).toISOString()
         }
-        const rateIPEnters = await rateLimitModel.find({IP: rateLimitData.IP, URL: rateLimitData.URL})
+        const rateIPEnters = await rateLimitModel.find({IP: rateLimitData.IP, URL: rateLimitData.URL}) //great than Date - return count
         try {
             overLimitRate = ((new Date(rateLimitData.date).getTime()) - (new Date(rateIPEnters[rateIPEnters.length - 5].date).getTime())) / 1000 < 10
         } catch (e) {

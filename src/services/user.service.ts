@@ -77,7 +77,7 @@ class UserService {
 
     async createUser(userData: IUser, isConfirm: boolean) {
         await this.isExistOrThrow(userData.login, userData.email)
-        const emailConfirmation: EmailConfirmationModel = userService.createEmailConfirmationInfo(isConfirm)
+        const emailConfirmation: EmailConfirmationModel = this.createEmailConfirmationInfo(isConfirm)
         const hashPassword = await cryptoService.hashPassword(userData.password)
         if (!isConfirm) {
             await mailService.sendActivationMail(userData.email, `${SETTINGS.PATH.API_URL}/api/auth/registration-confirmation/?code=${emailConfirmation.confirmationCode}`)
@@ -86,12 +86,15 @@ class UserService {
         return user
     }
 
-    async isExistOrThrow(login: string, email: string) {
+   private async isExistOrThrow(login: string, email: string) {
         const emailExists = await usersRepository.getUserByEmail(email)
         const loginExists = await usersRepository.getUserByLogin(login)
         if (emailExists) {
             throw ApiError.BadRequest(`Юзер с email ${email} уже существует`, 'email')
         }
+
+        // loginexists
+
         if (loginExists) {
             throw ApiError.BadRequest(`Юзер с login ${login} уже существует`, 'login')
         }
@@ -116,6 +119,7 @@ class UserService {
 
     async validateUser(userLoginOrEmail: string) {
         let user
+        // TODO: to const
         if (!/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(userLoginOrEmail)) {
             user = await usersRepository.getUserByLogin(userLoginOrEmail)
         } else {
