@@ -47,9 +47,9 @@ class CommentsController {
     async getCommentById(req: Request, res: Response) {
         try {
             const comment = await commentsQueryRepository.commentOutput(req.params.id)
-            const likeStatus = await likeModel.findOne({userId: comment.commentatorInfo.userId, commentId: comment.id})
             const isUserExists = await commentsRepository.isUserExists(req.headers.authorization as string)
-            res.status(200).json({...comment, likesInfo: {...comment.likesInfo, myStatus: isUserExists ? likeStatus?.status : LikeStatus.None}})
+            const likeStatus = await likeModel.findOne({userId: isUserExists?._id, commentId: comment.id})
+            res.status(200).json({...comment, likesInfo: {...comment.likesInfo, myStatus: isUserExists && likeStatus ? likeStatus?.status : LikeStatus.None}})
         } catch (e) {
             res.status(500).send(e)
         }

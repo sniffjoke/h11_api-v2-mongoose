@@ -6,6 +6,14 @@ import {LikeInstance} from "../interfaces/likes.interface";
 
 
 export async function likeFactory(likeStatus: string, comment: CommentInstance, user: UserInstance) {
+    const isLikeObjectForCurrentUserExists = await likeModel.findOne({userId: user._id});
+    if (!isLikeObjectForCurrentUserExists) {
+        const newLike = await likeModel.create({
+            status: LikeStatus.None,
+            userId: user._id,
+            commentId: comment._id,
+        })
+    }
     const findedLike: LikeInstance | null = await likeModel.findOne({userId: user._id, commentId: comment._id})
     if (findedLike?.status === likeStatus) {
         const updateLikeStatus = null
