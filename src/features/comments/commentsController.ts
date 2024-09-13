@@ -4,7 +4,7 @@ import {commentsQueryRepository} from "./commentsQueryRepository";
 import {commentModel} from "../../models/commentsModel";
 import {findBlogsHelper} from "../../helpers/blogsHelper";
 import {CreateItemsWithQueryDto} from "../blogs/dto/CreateDataWithQuery.dto";
-import {CommentInstance} from "../../interfaces/comments.interface";
+import {CommentInstance, LikeStatus} from "../../interfaces/comments.interface";
 import {findCommentsHelper} from "../../helpers/commentsHelper";
 import {tokenService} from "../../services/token.service";
 import {userModel} from "../../models/usersModel";
@@ -32,7 +32,12 @@ class CommentsController {
         try {
             const commentsQuery = await findCommentsHelper(req.query, req.params.id)
             const sortedComments = await commentsQueryRepository.getAllCommentsByPostId(commentsQuery)
-            const commentsQueryData = new CreateItemsWithQueryDto<CommentInstance>(commentsQuery, sortedComments)
+            const isUserExists = await commentsRepository.isUserExists(req.headers.authorization as string)
+            const commentsMap = await Promise.all(sortedComments.map( async (item) => {
+                const likeStatus = await likeModel.findOne({commentId: item._id, userId: item.commentatorInfo.userId})
+                return isUserExists ? {...item, likesInfo: {...item.likesInfo, myStatus: likeStatus?.status}} : {...item, likesInfo: {...item.likesInfo, myStatus: LikeStatus.None}}
+            }))
+            const commentsQueryData = new CreateItemsWithQueryDto<CommentInstance>(commentsQuery, commentsMap)
             res.status(200).json(commentsQueryData)
         } catch (e) {
             res.status(500).send(e)
@@ -41,12 +46,10 @@ class CommentsController {
 
     async getCommentById(req: Request, res: Response) {
         try {
-            const token = tokenService.getToken(req.headers.authorization);
-            const decodedToken: any = decode(token)
-            const user: UserInstance | null = await userModel.findById(decodedToken?._id)
             const comment = await commentsQueryRepository.commentOutput(req.params.id)
-            const likeStatus = await likeModel.findOne({userId: user?._id, commentId: comment.id})
-            res.status(200).json({...comment, likesInfo: {...comment.likesInfo, myStatus: likeStatus?.status}})
+            const likeStatus = await likeModel.findOne({userId: comment.commentatorInfo.userId, commentId: comment.id})
+            const isUserExists = await commentsRepository.isUserExists(req.headers.authorization as string)
+            res.status(200).json({...comment, likesInfo: {...comment.likesInfo, myStatus: isUserExists ? likeStatus?.status : LikeStatus.None}})
         } catch (e) {
             res.status(500).send(e)
         }
@@ -79,14 +82,6 @@ class CommentsController {
             const likeStatus = req.body.likeStatus
             const findedComment = await commentModel.findById(req.params.id)
             const updates = await likeFactory(likeStatus, findedComment!, user!)
-            // if (likeStatus === LikeStatus.Like) {
-                // const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.likesCount': +1, 'likesInfo.dislikesCount': -1})
-                // const updateCommentInfo = await commentModel.updateOne({_id: req.params.id}, {$inc: {'likesInfo.likesCount': 1, 'likesInfo.dislikesCount': -1}})
-            // }
-            // if (likeStatus === LikeStatus.Dislike) {
-                // const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': +1})
-                // const updateCommentInfo = await commentModel.updateOne({_id: req.params.id}, {$inc: {'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': 1}})
-            // }
             res.status(204).send('Обновлено')
         } catch (e) {
             res.status(500).send(e)

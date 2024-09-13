@@ -16,6 +16,8 @@ router.route('/')
 
 router.route('/:id')
     .get(
+        idCommentValidator,
+        errorExpressValidatorMiddleware,
         commentsController.getCommentById,
     )
     .put(
