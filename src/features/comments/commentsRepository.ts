@@ -71,7 +71,7 @@ class CommentsRepository {
     public users = userModel
     public posts = postModel
 
-    async createComment(commentData: IComment, token: string, postId: string): Promise<CommentInstance> {
+    async createComment(commentData: IComment, token: string, postId: string) {
         const decodedToken: any = decode(token)
         const user: UserInstance | null = await this.users.findById(decodedToken?._id)
         const commentatorInfo: CommentatorInfoInterface = {
@@ -89,7 +89,10 @@ class CommentsRepository {
             userId: decodedToken._id,
             commentId: comment._id,
         })
-        return comment
+        return {
+            comment,
+            likeStatus
+        }
     }
 
     async updateCommentById(id: string, comment: CommentInstance): Promise<UpdateWriteOpResult> {

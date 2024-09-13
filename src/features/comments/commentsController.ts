@@ -57,9 +57,9 @@ class CommentsController {
 
     async createCommentByPostId(req: Request, res: Response) {
         try {
-            const comment = await commentsRepository.createComment(req.body, tokenService.getToken(req.headers.authorization), req.params.id)
-            const newComment = commentsQueryRepository.commentMapOutput(comment)
-            res.status(201).json(newComment)
+            const {comment, likeStatus} = await commentsRepository.createComment(req.body, tokenService.getToken(req.headers.authorization), req.params.id)
+            const newComment = await commentsQueryRepository.commentOutput(comment._id)
+            res.status(201).json({...newComment, likesInfo: {...newComment.likesInfo, myStatus: LikeStatus.None}})
         } catch (e) {
             res.status(500).send(e)
         }
