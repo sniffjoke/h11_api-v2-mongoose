@@ -62,6 +62,7 @@ import {CommentatorInfoInterface} from "./dto/CreateComment.dto";
 import {UserInstance} from "../../interfaces/users.interface";
 import {UpdateWriteOpResult} from "mongoose";
 import {UpdateCommentDto} from "./dto/UpdateComment.dto";
+import {likeModel} from "../../models/likesModel";
 
 class CommentsRepository {
 
@@ -79,10 +80,14 @@ class CommentsRepository {
         const likesInfo: LikesInfo = {
             likesCount: 0,
             dislikesCount: 0,
-            myStatus: LikeStatus.None
         }
         const comment = new this.comments({...commentData, commentatorInfo, postId, likesInfo})
         await comment.save()
+        const likeStatus = await likeModel.create({
+            status: LikeStatus.None,
+            userId: decodedToken._id,
+            commentId: comment._id,
+        })
         return comment
     }
 

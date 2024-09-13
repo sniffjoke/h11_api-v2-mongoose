@@ -7,7 +7,6 @@ export enum LikeStatus {
 export interface LikesInfo {
     likesCount: number;
     dislikesCount: number;
-    myStatus: LikeStatus;
 }
 
 export interface CommentInstance {

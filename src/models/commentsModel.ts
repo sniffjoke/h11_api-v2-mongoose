@@ -1,5 +1,5 @@
 import {model, Schema} from "mongoose";
-import {CommentInstance, LikeStatus} from "../interfaces/comments.interface";
+import {CommentInstance} from "../interfaces/comments.interface";
 
 const commentatorInfoSchema: Schema = new Schema({
         userId: {
@@ -24,11 +24,6 @@ const likesInfoSchema: Schema = new Schema({
         dislikesCount: {
             type: Number,
             default: 0
-        },
-        myStatus: {
-            type: String,
-            enum: LikeStatus,
-            default: LikeStatus.None
         }
     },
     {

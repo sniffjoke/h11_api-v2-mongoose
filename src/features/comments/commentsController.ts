@@ -7,6 +7,11 @@ import {CreateItemsWithQueryDto} from "../blogs/dto/CreateDataWithQuery.dto";
 import {CommentInstance} from "../../interfaces/comments.interface";
 import {findCommentsHelper} from "../../helpers/commentsHelper";
 import {tokenService} from "../../services/token.service";
+import {userModel} from "../../models/usersModel";
+import {decode} from "jsonwebtoken";
+import {UserInstance} from "../../interfaces/users.interface";
+import {likeModel} from "../../models/likesModel";
+import {likeFactory} from "../../factorys/likeFactory";
 
 class CommentsController {
 
@@ -36,8 +41,12 @@ class CommentsController {
 
     async getCommentById(req: Request, res: Response) {
         try {
+            const token = tokenService.getToken(req.headers.authorization);
+            const decodedToken: any = decode(token)
+            const user: UserInstance | null = await userModel.findById(decodedToken?._id)
             const comment = await commentsQueryRepository.commentOutput(req.params.id)
-            res.status(200).json(comment)
+            const likeStatus = await likeModel.findOne({userId: user?._id, commentId: comment.id})
+            res.status(200).json({...comment, likesInfo: {...comment.likesInfo, myStatus: likeStatus?.status}})
         } catch (e) {
             res.status(500).send(e)
         }
@@ -64,9 +73,20 @@ class CommentsController {
 
     async updateCommentByIdWithLikeStatus(req: Request, res: Response) {
         try {
+            const token = tokenService.getToken(req.headers.authorization);
+            const decodedToken: any = decode(token)
+            const user: UserInstance | null = await userModel.findById(decodedToken?._id)
             const likeStatus = req.body.likeStatus
             const findedComment = await commentModel.findById(req.params.id)
-            const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.myStatus': likeStatus})
+            const updates = await likeFactory(likeStatus, findedComment!, user!)
+            // if (likeStatus === LikeStatus.Like) {
+                // const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.likesCount': +1, 'likesInfo.dislikesCount': -1})
+                // const updateCommentInfo = await commentModel.updateOne({_id: req.params.id}, {$inc: {'likesInfo.likesCount': 1, 'likesInfo.dislikesCount': -1}})
+            // }
+            // if (likeStatus === LikeStatus.Dislike) {
+                // const updateCommentStatus = await commentModel.updateOne({_id: req.params.id}, {'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': +1})
+                // const updateCommentInfo = await commentModel.updateOne({_id: req.params.id}, {$inc: {'likesInfo.likesCount': -1, 'likesInfo.dislikesCount': 1}})
+            // }
             res.status(204).send('Обновлено')
         } catch (e) {
             res.status(500).send(e)

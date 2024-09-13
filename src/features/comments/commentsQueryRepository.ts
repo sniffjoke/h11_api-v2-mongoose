@@ -57,7 +57,7 @@ class CommentsQueryRepository {
     public comments = commentModel
 
     async commentOutput(id: string): Promise<CreateCommentDto> {
-        const comment = await this.comments.findById(id)
+        const comment = await this.comments.findById(id).lean()
         return this.commentMapOutput(comment as CommentInstance)
     }
 
