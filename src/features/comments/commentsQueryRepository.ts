@@ -80,9 +80,11 @@ class CommentsQueryRepository {
         const filter = {
             postId
         }
+        const {sortBy} = query
         const sortedComments = await this.comments
             .find(filter)
             // .sort(query.sortBy, query.sortDirection)
+            .sort({createdAt: -1})
             .limit(query.pageSize)
             .skip((query.page - 1) * query.pageSize)
             .lean()
