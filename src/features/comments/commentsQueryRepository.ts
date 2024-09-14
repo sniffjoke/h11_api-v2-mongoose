@@ -72,7 +72,7 @@ class CommentsQueryRepository {
             // .sort(query.sortBy, query.sortDirection)
             .limit(query.pageSize)
             .skip((query.page - 1) * query.pageSize)
-        return sortedComments
+        return sortedComments.map(item => this.commentMapOutput(item))
     }
 
     async getAllCommentsByPostId(query: any) {
@@ -86,7 +86,7 @@ class CommentsQueryRepository {
             .limit(query.pageSize)
             .skip((query.page - 1) * query.pageSize)
             .lean()
-        return sortedComments
+        return sortedComments.map(item => this.commentMapOutput(item))
     }
 
 }

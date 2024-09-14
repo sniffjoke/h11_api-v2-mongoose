@@ -34,7 +34,7 @@ class CommentsController {
             const sortedComments = await commentsQueryRepository.getAllCommentsByPostId(commentsQuery)
             const isUserExists = await commentsRepository.isUserExists(req.headers.authorization as string)
             const commentsMap = await Promise.all(sortedComments.map( async (item) => {
-                const likeStatus = await likeModel.findOne({commentId: item._id, userId: item.commentatorInfo.userId})
+                const likeStatus = await likeModel.findOne({commentId: item.id, userId: item.commentatorInfo.userId})
                 return isUserExists ? {...item, likesInfo: {...item.likesInfo, myStatus: likeStatus?.status}} : {...item, likesInfo: {...item.likesInfo, myStatus: LikeStatus.None}}
             }))
             const commentsQueryData = new CreateItemsWithQueryDto<CommentInstance>(commentsQuery, commentsMap)
